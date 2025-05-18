@@ -3,3 +3,10 @@
 ################################################################################
 
 /.vs/hivespace.microservice-backend/v17
+/src/Services/BasketService/Basket.API/obj
+/src/Services/CatalogService/Catalog.API/obj
+/src/Services/OrderService/Order.API/obj
+/.vs
+/BuildingBlocks/EventBus/obj
+/EventBus/EventBus/obj/Debug/net8.0
+/src/BuildingBlocks/EventBus/EventBus/obj
