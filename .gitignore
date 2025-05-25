@@ -10,8 +10,7 @@
 /BuildingBlocks/EventBus/obj
 /EventBus/EventBus/obj/Debug/net8.0
 /src/BuildingBlocks/EventBus/EventBus/obj
-/src/Services/IdentityService/Identity.API/bin/Debug/net8.0
-/src/Services/IdentityService/Identity.API/obj
+
 /src/Services/Basket/Basket.API/bin/Debug/net8.0
 /src/Services/Basket/Basket.API/obj
 /src/Services/Catalog/Catalog.API/obj
