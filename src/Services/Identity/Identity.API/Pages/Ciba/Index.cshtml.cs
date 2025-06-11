@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Ciba;
-
 [AllowAnonymous]
 [SecurityHeaders]
 public class IndexModel : PageModel

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.ExternalLogin;
-
 [AllowAnonymous]
 [SecurityHeaders]
 public class Challenge : PageModel

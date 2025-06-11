@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Consent;
-
 [Authorize]
 [SecurityHeaders]
 public class Index : PageModel

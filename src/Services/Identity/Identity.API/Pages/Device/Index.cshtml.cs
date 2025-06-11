@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 
 namespace Identity.API.Pages.Device;
-
 [SecurityHeaders]
 [Authorize]
 public class Index : PageModel

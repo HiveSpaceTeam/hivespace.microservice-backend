@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Login;
-
 [SecurityHeaders]
 [AllowAnonymous]
 public class Index : PageModel

@@ -1,13 +1,12 @@
-using System.Security.Claims;
 using Duende.IdentityModel;
 using Identity.API.Data;
 using Identity.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Security.Claims;
 
 namespace Identity.API;
-
 public class SeedData
 {
     public static void EnsureSeedData(WebApplication app)
@@ -33,12 +32,12 @@ public class SeedData
                     throw new Exception(result.Errors.First().Description);
                 }
 
-                result = userMgr.AddClaimsAsync(alice, new Claim[]{
+                result = userMgr.AddClaimsAsync(alice, [
                             new Claim(JwtClaimTypes.Name, "Alice Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Alice"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
                             new Claim(JwtClaimTypes.WebSite, "http://alice.example.com"),
-                        }).Result;
+                        ]).Result;
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Errors.First().Description);
@@ -65,13 +64,13 @@ public class SeedData
                     throw new Exception(result.Errors.First().Description);
                 }
 
-                result = userMgr.AddClaimsAsync(bob, new Claim[]{
+                result = userMgr.AddClaimsAsync(bob, [
                             new Claim(JwtClaimTypes.Name, "Bob Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Bob"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
                             new Claim(JwtClaimTypes.WebSite, "http://bob.example.com"),
                             new Claim("location", "somewhere")
-                        }).Result;
+                        ]).Result;
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Errors.First().Description);

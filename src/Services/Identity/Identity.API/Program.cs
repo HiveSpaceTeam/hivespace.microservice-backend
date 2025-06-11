@@ -26,7 +26,10 @@ try
 
     // this seeding is only for the template to bootstrap the DB and users.
     // in production you will likely want a different approach.
-    SeedData.EnsureSeedData(app);
+    if (app.Environment.IsDevelopment())
+    {
+        SeedData.EnsureSeedData(app);
+    }
     if (args.Contains("/seed"))
     {
         Log.Information("Seeding database...");

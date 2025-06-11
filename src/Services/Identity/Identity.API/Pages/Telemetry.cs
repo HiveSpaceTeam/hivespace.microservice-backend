@@ -1,7 +1,6 @@
 using System.Diagnostics.Metrics;
 
 namespace Identity.API.Pages;
-
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1724 // Type names should not match namespaces
 
@@ -79,11 +78,11 @@ public static class Telemetry
 
             foreach (var scope in scopes)
             {
-                //ConsentCounter.Add(1,
-                //    new(Tags.Client, clientId),
-                //    new(Tags.Scope, scope),
-                //    new(Tags.Remember, remember),
-                //    new(Tags.Consent, TagValues.Granted));
+                ConsentCounter.Add(1,
+                    new(Tags.Client, clientId),
+                    new(Tags.Scope, scope),
+                    new(Tags.Remember, remember),
+                    new(Tags.Consent, TagValues.Granted));
             }
         }
 

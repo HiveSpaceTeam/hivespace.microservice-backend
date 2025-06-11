@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.ServerSideSessions;
-
 public class IndexModel : PageModel
 {
     private readonly ISessionManagementService? _sessionManagementService;
