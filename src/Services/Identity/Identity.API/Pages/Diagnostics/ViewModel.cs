@@ -1,10 +1,9 @@
-using System.Text;
-using System.Text.Json;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
+using System.Text;
+using System.Text.Json;
 
 namespace Identity.API.Pages.Diagnostics;
-
 public class ViewModel
 {
     public ViewModel(AuthenticateResult result)

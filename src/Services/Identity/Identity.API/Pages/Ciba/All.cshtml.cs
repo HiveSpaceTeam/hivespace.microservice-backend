@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Ciba;
-
 [SecurityHeaders]
 [Authorize]
 public class AllModel : PageModel

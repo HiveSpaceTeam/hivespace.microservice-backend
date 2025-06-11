@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Redirect;
-
 [AllowAnonymous]
 public class IndexModel : PageModel
 {

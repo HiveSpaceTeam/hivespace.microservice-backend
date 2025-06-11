@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Logout;
-
 [SecurityHeaders]
 [AllowAnonymous]
 public class LoggedOut : PageModel

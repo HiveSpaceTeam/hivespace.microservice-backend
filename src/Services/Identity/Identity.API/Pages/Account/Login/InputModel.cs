@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Identity.API.Pages.Login;
-
 public class InputModel
 {
     [Required]

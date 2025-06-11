@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Identity.API.Pages.Logout;
-
 [SecurityHeaders]
 [AllowAnonymous]
 public class Index : PageModel
@@ -68,32 +67,47 @@ public class Index : PageModel
             // this captures necessary info from the current logged in user
             // this can still return null if there is no context needed
             LogoutId ??= await _interaction.CreateLogoutContextAsync();
+            var logoutRequest = await _interaction.GetLogoutContextAsync(LogoutId);
 
-            // delete local authentication cookie
-            await _signInManager.SignOutAsync();
-
-            // see if we need to trigger federated logout
-            var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
-
-            // raise the logout event
-            await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
-            Telemetry.Metrics.UserLogout(idp);
-
-            // if it's a local login we can ignore this workflow
-            if (idp != null && idp != Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider)
+            if (User.Identity?.IsAuthenticated == true)
             {
-                // we need to see if the provider supports external logout
-                if (await HttpContext.GetSchemeSupportsSignOutAsync(idp))
-                {
-                    // build a return URL so the upstream provider will redirect back
-                    // to us after the user has logged out. this allows us to then
-                    // complete our single sign-out processing.
-                    var url = Url.Page("/Account/Logout/Loggedout", new { logoutId = LogoutId });
+                await _signInManager.SignOutAsync();
 
-                    // this triggers a redirect to the external provider for sign-out
-                    return SignOut(new AuthenticationProperties { RedirectUri = url }, idp);
-                }
+                await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
             }
+
+            // if a valid post logout redirect URI is found, use it
+            if (!string.IsNullOrEmpty(logoutRequest?.PostLogoutRedirectUri))
+            {
+                return Redirect(logoutRequest.PostLogoutRedirectUri);
+            }
+
+            //var logout = await _interaction.GetLogoutContextAsync(logoutId);
+            //// delete local authentication cookie
+            //await _signInManager.SignOutAsync();
+
+            //// see if we need to trigger federated logout
+            //var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
+
+            //// raise the logout event
+            //await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
+            //Telemetry.Metrics.UserLogout(idp);
+
+            //// if it's a local login we can ignore this workflow
+            //if (idp != null && idp != Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider)
+            //{
+            //    // we need to see if the provider supports external logout
+            //    if (await HttpContext.GetSchemeSupportsSignOutAsync(idp))
+            //    {
+            //        // build a return URL so the upstream provider will redirect back
+            //        // to us after the user has logged out. this allows us to then
+            //        // complete our single sign-out processing.
+            //        var url = Url.Page("/Account/Logout/Loggedout", new { logoutId = LogoutId });
+
+            //        // this triggers a redirect to the external provider for sign-out
+            //        return SignOut(new AuthenticationProperties { RedirectUri = url }, idp);
+            //    }
+            //}
         }
 
         return RedirectToPage("/Account/Logout/LoggedOut", new { logoutId = LogoutId });

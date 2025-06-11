@@ -13,7 +13,12 @@
 
 /src/Services/Basket/Basket.API/bin/Debug/net8.0
 /src/Services/Basket/Basket.API/obj
+/src/Services/Catalog/Catalog.API/bin/Debug/net8.0
 /src/Services/Catalog/Catalog.API/obj
 /src/Services/Identity/Identity.API/bin/Debug/net8.0
 /src/Services/Identity/Identity.API/obj
+/src/Services/Order/Order.API/bin/Debug/net8.0
 /src/Services/Order/Order.API/obj
+/src/ApiGateway/YarpApiGateway/bin/Debug/net8.0
+/src/ApiGateway/YarpApiGateway/obj
+/src/BuildingBlocks/EventBus/EventBus/bin/Debug/net8.0
