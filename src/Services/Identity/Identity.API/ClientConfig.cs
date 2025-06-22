@@ -6,6 +6,7 @@ public record ClientConfig
     public string ClientId { get; init; } = string.Empty;
     public string ClientName { get; init; } = string.Empty;
     public string ClientUri { get; init; } = string.Empty;
+    public string ClientSecret { get; init; } = string.Empty;
     public bool RequireClientSecret { get; init; }
     public List<string> AllowedGrantTypes { get; init; } = [];
     public bool AllowAccessTokensViaBrowser { get; init; }

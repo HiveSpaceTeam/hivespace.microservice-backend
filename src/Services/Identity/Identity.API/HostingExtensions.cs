@@ -1,10 +1,11 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using HealthChecks.UI.Client;
 using Identity.API.Data;
+using Identity.API.Interfaces;
 using Identity.API.Models;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Identity.API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -51,6 +52,11 @@ internal static class HostingExtensions
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder, IConfiguration configuration)
     {
         builder.Services.AddRazorPages();
+        
+        // Add API Controllers
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        
         var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
         var connectionString = configuration.GetConnectionString("IdentityServiceDb");
 
@@ -63,6 +69,12 @@ internal static class HostingExtensions
         })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        // Register HttpContextAccessor for service layer
+        builder.Services.AddHttpContextAccessor();
+
+        // Register UserAddressService
+        builder.Services.AddScoped<IUserAddressService, UserAddressService>();
 
         builder.Services
             .AddIdentityServer(options =>
@@ -86,18 +98,31 @@ internal static class HostingExtensions
             //})
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
+            .AddInMemoryApiResources(Config.ApiResources)
             .AddInMemoryClients(Config.GetClients(configuration))
             .AddAspNetIdentity<ApplicationUser>()
             .AddLicenseSummary();
 
-        var authenticationBuilder = builder.Services.AddAuthentication();
+        // Add JWT Bearer authentication for API endpoints
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "https://localhost:5001"; // IdentityServer URL
+            options.RequireHttpsMetadata = true;
+            options.Audience = "identity";
+        });
 
         var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
         var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
         if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
         {
-            authenticationBuilder
+            builder.Services
+                .AddAuthentication()
                 .AddGoogle(options =>
                 {
                     options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -107,7 +132,6 @@ internal static class HostingExtensions
                 });
         }
 
-
         return builder.Build();
     }
 
@@ -116,17 +140,18 @@ internal static class HostingExtensions
     {
         app.UseSerilogRequestLogging();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
+        app.UseDeveloperExceptionPage();
 
         //InitializeDatabase(app, app.Configuration);
 
         app.UseStaticFiles();
         app.UseRouting();
-        app.UseIdentityServer();
+        app.UseAuthentication();
         app.UseAuthorization();
+        app.UseIdentityServer();
+
+        // Map API Controllers
+        app.MapControllers();
 
         app.MapRazorPages()
             .RequireAuthorization();
