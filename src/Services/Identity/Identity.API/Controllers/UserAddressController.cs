@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Identity.API.Controllers;
 
+[Authorize(Policy = "RequireIdentityFullAccessScope")]
 [ApiController]
 [Route("api/v1/users/address")]
-[Authorize]
 public class UserAddressController : ControllerBase
 {
     private readonly IUserAddressService _userAddressService;
