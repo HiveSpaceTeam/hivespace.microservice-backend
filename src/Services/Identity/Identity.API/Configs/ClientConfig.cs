@@ -1,5 +1,5 @@
 ﻿// Config.cs
-namespace Identity.API;
+namespace Identity.API.Configs;
 
 public record ClientConfig
 {

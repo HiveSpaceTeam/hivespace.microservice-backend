@@ -1,11 +1,11 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
+using Identity.API.Configs;
 using Identity.API.Data;
 using Identity.API.Interfaces;
 using Identity.API.Models;
 using Identity.API.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -14,6 +14,9 @@ namespace Identity.API;
 
 internal static class HostingExtensions
 {
+    private const string IdentityApiResourceName = "identity";
+    private const string IdentityServiceDbConnection = "IdentityServiceDb";
+
     private static void InitializeDatabase(IApplicationBuilder app, IConfiguration configuration)
     {
         using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
@@ -51,31 +54,30 @@ internal static class HostingExtensions
 
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder, IConfiguration configuration)
     {
+        // Razor Pages & Controllers
         builder.Services.AddRazorPages();
-        
-        // Add API Controllers
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        
-        var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
-        var connectionString = configuration.GetConnectionString("IdentityServiceDb");
 
+        // Database
+        var connectionString = configuration.GetConnectionString(IdentityServiceDbConnection)
+            ?? throw new InvalidOperationException($"Connection string '{IdentityServiceDbConnection}' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Identity
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
             options.User.RequireUniqueEmail = true;
         })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
 
-        // Register HttpContextAccessor for service layer
+        // HttpContextAccessor & Services
         builder.Services.AddHttpContextAccessor();
-
-        // Register UserAddressService
         builder.Services.AddScoped<IUserAddressService, UserAddressService>();
 
+        // IdentityServer
         builder.Services
             .AddIdentityServer(options =>
             {
@@ -85,17 +87,6 @@ internal static class HostingExtensions
                 options.Events.RaiseSuccessEvents = true;
                 options.Endpoints.EnableCheckSessionEndpoint = true;
             })
-            //.AddConfigurationStore(options =>
-            //{
-            //    options.ConfigureDbContext = db =>
-            //        db.UseSqlServer(connectionString);
-            //})
-            //.AddOperationalStore(options =>
-            //{
-
-            //   options.ConfigureDbContext = db =>
-            //        db.UseSqlServer(connectionString);
-            //})
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryApiResources(Config.ApiResources)
@@ -103,22 +94,25 @@ internal static class HostingExtensions
             .AddAspNetIdentity<ApplicationUser>()
             .AddLicenseSummary();
 
-        // Add JWT Bearer authentication for API endpoints
-        builder.Services.AddAuthentication(options =>
+        builder.Services.AddAuthentication()
+            .AddLocalApi(options =>
+            {
+                options.ExpectedScope = "identity.fullaccess";
+            });
+
+        builder.Services.AddAuthorization(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.Authority = "https://localhost:5001"; // IdentityServer URL
-            options.RequireHttpsMetadata = true;
-            options.Audience = "identity";
+            options.AddPolicy("RequireIdentityFullAccessScope", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("scope", "identity.fullaccess");
+                policy.AuthenticationSchemes.Add(IdentityServerConstants.LocalApi.AuthenticationScheme);
+            });
         });
 
+        // External Auth (Google)
         var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
         var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-
         if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
         {
             builder.Services
@@ -134,7 +128,6 @@ internal static class HostingExtensions
 
         return builder.Build();
     }
-
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
